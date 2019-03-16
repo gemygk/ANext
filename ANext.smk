@@ -13,7 +13,7 @@ __license__ = "GNU General Public License v3.0"
 __maintainer__ = "Gemy George Kaithakottil"
 __email__ = "Gemy.Kaithakottil@gmail.com, gemygk@gmail.com"
 __status__ = "Production"
-__version__ = "0.1"
+__version__ = "0.01"
 
 # import modules
 import os
@@ -104,8 +104,6 @@ else:
     scallop_strand = "unstranded"
     portcullis_strand = "unstranded"
 
-# report: "report/workflow.rst"
-
 # create logs folder
 # need to find a proper fix for this as mentioned in the issue below, but for now using a quick fix
 # # https://bitbucket.org/snakemake/snakemake/issues/838/how-to-create-output-folders-for-slurm-log#comment-45348663
@@ -144,11 +142,9 @@ rule hisat2_build:
         genome = genome
     output:
         expand(os.path.join(OUTPUT,HISAT_VERSION,"index",genome_base + ".hisat2-build.done")),
-        # report("fig1.svg", caption="report/fig1.rst", category="Step 1")
     log:
         cwd = expand(os.path.join(OUTPUT,HISAT_VERSION,"index","hisat2_build.log"))
     threads: 4
-    # message: "Executing hisat2-build"
     params:
         source = config["load"]["hisat2"],
         cwd = expand(os.path.join(OUTPUT,HISAT_VERSION,"index"))
