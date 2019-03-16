@@ -1,0 +1,52 @@
+{
+    "__default__" :
+    {
+        "time" : "7-00:00:00",
+        "c" : 1,
+        "J" : "ANext.{rule}",
+        "o" : "logs/cluster/{rule}.log",
+        "partition" : "ei-cb"
+    },
+    "hisat2_build" :
+    {
+        "time" : "7-00:00:00",
+        "c" : 4,
+        "mem" : 20480,
+        "o" : "logs/cluster/{rule}.log",
+        "partition" : "ei-cb"
+    },
+    "hisat2" :
+    {
+        "time" : "7-00:00:00",
+        "J" : "ANext.{rule}.{wildcards}",
+        "o" : "logs/cluster/{rule}.{wildcards.sample}.log",
+        "c" : 4,
+        "mem" : 30720,
+        "partition" : "ei-cb"
+    },
+    "stringtie" :
+    {
+        "time" : "7-00:00:00",
+        "J" : "ANext.{rule}.{wildcards}",
+        "o" : "logs/cluster/{rule}.{wildcards.sample}.log",
+        "c" : 4,
+        "mem" : 10240,
+        "partition" : "ei-cb"
+    },
+    "scallop" :
+    {
+        "time" : "7-00:00:00",
+        "J" : "ANext.{rule}.{wildcards}",
+        "o" : "logs/cluster/{rule}.{wildcards.sample}.log",
+        "c" : 4,
+        "mem" : 10240,
+        "partition" : "ei-cb"
+    },
+    "portcullis" :
+    {
+        "time" : "7-00:00:00",
+        "c" : 8,
+        "mem" : 51200,
+        "partition" : "ei-cb"
+    }
+}
