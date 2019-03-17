@@ -35,6 +35,9 @@ output: ./output
 #######################
 # source required tools and provide parameters
 # NOTE: below tools are required for the RNA-Seq assembly pipeline
+# ANext infers the folder name using second element (str.split(" ")),
+# for e.g., from "source hisat-2.1.0", we use "hisat-2.1.0" as the folder name.
+# So, please use the same format to source tools to the current $PATH
 #######################
 load:
   hisat2: "source hisat-2.1.0"
