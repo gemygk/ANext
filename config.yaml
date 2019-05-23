@@ -2,7 +2,7 @@
 # Input parameters required to drive RNA-Seq assembly suite
 ###########################################################
 
-# provide path to genome file
+# provide path to genome file (Currently gzipped (*.gz) fasta is NOT supported)
 genome: data/genome/genome.fa
 
 # provide paired-end samples
