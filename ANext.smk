@@ -199,8 +199,9 @@ rule hisat2:
         r2= get_r2,
         idx = os.path.join(OUTPUT,HISAT_VERSION,"index",genome_base + ".hisat2-build.done")
     output:
+        unsorted_bam = os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.dta.unsorted.bam"),
         bam = os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.bam"),
-        bai = os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.bam.bai")
+        bai = os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.bam.csi") if csi_index else os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.bam.bai")
     log:
         os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.hisat2.log")
     params:
@@ -217,9 +218,9 @@ rule hisat2:
         + " && {params.source_hisat2} "
         + " && {params.source_samtools} "
         + " && /usr/bin/time -v hisat2 {params.extra} -x {params.idx} -p {threads} -1 {input.r1} -2 {input.r2} "
-        + " | /usr/bin/time -v samtools view -b -@ {threads} - > {wildcards.sample}.dta.unsorted.bam "
-        + " && /usr/bin/time -v samtools sort --threads {threads} {wildcards.sample}.dta.unsorted.bam > {output.bam} "
-        + " && /usr/bin/time -v samtools index {params.csi_index_status} {output.bam}) "
+        + " | /usr/bin/time -v samtools view -b -@ {threads} - > {output.unsorted_bam} "
+        + " && /usr/bin/time -v samtools sort --threads {threads} {output.unsorted_bam} > {output.bam} "
+        + " && /usr/bin/time -v samtools index -@ {threads} {params.csi_index_status} {output.bam}) "
         + " 2> {log}"
 
 
