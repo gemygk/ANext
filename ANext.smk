@@ -19,6 +19,8 @@ __version__ = "0.01"
 import os
 import sys
 from glob import glob
+import subprocess
+
 
 # Request min version of snakemake
 from snakemake.utils import min_version
@@ -33,6 +35,29 @@ if not os.path.exists(genome):
     print ("ERROR: The genome file cannot be accessed - '{0}'".format(genome))
     sys.exit()
 genome_base = os.path.basename(genome)
+# check if genome is gzipped and exit if true
+gzipped = None
+gzipped = True if genome.lower().endswith(".gz") else False
+if gzipped:
+    print("ERROR: '{0}' file should not be gzipped, please unzip the file and rerun".format(genome))
+    sys.exit()
+
+# check if genome is over 2^31-1, if yes, create CSI index
+cmd = "awk 'BEGIN {total=0} {if($0 !~ /^>/) {total+=length}} END{print total}' " +  genome
+p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
+(result,error) = p.communicate()
+exit_code = p.returncode
+if exit_code:
+    raise subprocess.CalledProcessError(exit_code,cmd)
+result = int(result) # convert str to int
+print("The worked out genome length is:{}".format(result))
+csi_index = None
+if result < (2**31)-1:
+    # print ("INFO:Normal bai index {} < 2**31-1".format(result))
+    csi_index = False
+else:
+    # print ("INFO:Create csi index {} > 2**31-1".format(result))
+    csi_index = True
 
 # get tools
 HISAT_VERSION = None
@@ -183,17 +208,19 @@ rule hisat2:
         idx = expand(os.path.join(OUTPUT,HISAT_VERSION,"index","{genome}"),genome=genome_base),
         source_hisat2 = config["load"]["hisat2"],
         source_samtools = config["load"]["samtools"],
-        extra = config["load_parameters"]["hisat2"] + " --rna-strandness " + hisat2_strand if hisat2_strand not in ("unstranded") else config["load_parameters"]["hisat2"]
+        extra = config["load_parameters"]["hisat2"] + " --rna-strandness " + hisat2_strand if hisat2_strand not in ("unstranded") else config["load_parameters"]["hisat2"],
+        csi_index_status = "-c" if csi_index else ""
     threads: 4
     shell:
         "(set +u" \
-        + " && cd {params.cwd} " \
-        + " && {params.source_hisat2} " \
-        + " && {params.source_samtools} " \
-        + " && /usr/bin/time -v hisat2 {params.extra} -x {params.idx} -p {threads} -1 {input.r1} -2 {input.r2} " \
-        + " | /usr/bin/time -v samtools view -b -@ {threads} - > {wildcards.sample}.dta.unsorted.bam " \
-        + " && /usr/bin/time -v samtools sort --threads {threads} {wildcards.sample}.dta.unsorted.bam > {output.bam} " \
-        + " && /usr/bin/time -v samtools index {output.bam}) 2> {log}"
+        + " && cd {params.cwd} "
+        + " && {params.source_hisat2} "
+        + " && {params.source_samtools} "
+        + " && /usr/bin/time -v hisat2 {params.extra} -x {params.idx} -p {threads} -1 {input.r1} -2 {input.r2} "
+        + " | /usr/bin/time -v samtools view -b -@ {threads} - > {wildcards.sample}.dta.unsorted.bam "
+        + " && /usr/bin/time -v samtools sort --threads {threads} {wildcards.sample}.dta.unsorted.bam > {output.bam} "
+        + " && /usr/bin/time -v samtools index {params.csi_index_status} {output.bam}) "
+        + " 2> {log}"
 
 
 # run stringtie
