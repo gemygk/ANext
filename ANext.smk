@@ -149,7 +149,7 @@ shell.prefix("set -eo pipefail; ")
 rule all:
     input:
         expand(os.path.join(OUTPUT,HISAT_VERSION,"index",genome_base + ".hisat2-build.done")),
-        expand(os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.{ext}"),sample=rna_seq_samples,ext=['bam', 'bam.bai']),
+        expand(os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.{ext}"),sample=rna_seq_samples,ext=['bam', 'bam.csi']) if csi_index else expand(os.path.join(OUTPUT,HISAT_VERSION,"{sample}","{sample}.{ext}"),sample=rna_seq_samples,ext=['bam', 'bam.bai']),
         expand(os.path.join(OUTPUT,STRINGTIE_VERSION,"{sample}","stringtie_{sample}.transcripts.gtf"),sample=rna_seq_samples),
         expand(os.path.join(OUTPUT,SCALLOP_VERSION,"{sample}","scallop_{sample}.transcripts.gtf"),sample=rna_seq_samples),
         expand(os.path.join(OUTPUT,PORTCULLIS_VERSION,"portcullis_out","3-filt","portcullis_filtered.{status}.junctions.{ext}"),
@@ -174,9 +174,9 @@ rule hisat2_build:
         source = config["load"]["hisat2"],
         cwd = expand(os.path.join(OUTPUT,HISAT_VERSION,"index"))
     shell:
-        "(set +u" \
-        + " && cd {params.cwd}" \
-        + " && ln -s {input.genome}" \
+        "(set +u"
+        + " && cd {params.cwd}"
+        + " && ln -s {input.genome}"
         + " && {params.source} && /usr/bin/time -v hisat2-build -p {threads} {genome_base} {genome_base}" \
         + " && touch {output}) 2> {log}"
 
@@ -239,9 +239,9 @@ rule stringtie:
         extra = config["load_parameters"]["stringtie"] + " " + stringtie_strand if stringtie_strand not in ("unstranded") else config["load_parameters"]["stringtie"]
     threads: 4
     shell:
-        "(set +u" \
-        + " && cd {params.cwd} " \
-        + " && {params.source} " \
+        "(set +u"
+        + " && cd {params.cwd} "
+        + " && {params.source} "
         + " && /usr/bin/time -v stringtie {input.bam} {params.extra} -p {threads} -o {output}) 2> {log}"
 
 
@@ -260,9 +260,9 @@ rule scallop:
         extra = config["load_parameters"]["scallop"] + " --library_type " + scallop_strand if scallop_strand not in ("unstranded") else config["load_parameters"]["scallop"]
     threads: 4
     shell:
-        "(set +u" \
-        + " && cd {params.cwd} " \
-        + " && {params.source} " \
+        "(set +u"
+        + " && cd {params.cwd} "
+        + " && {params.source} "
         + " && /usr/bin/time -v scallop -i {input.bam} -o {output} {params.extra}) 2> {log}"
 
 
@@ -280,13 +280,14 @@ rule portcullis:
     params:
         cwd = os.path.join(OUTPUT,PORTCULLIS_VERSION),
         source = config["load"]["portcullis"],
-        extra = config["load_parameters"]["portcullis"] + " --output portcullis_out --strandedness " + portcullis_strand
+        extra = config["load_parameters"]["portcullis"] + " --output portcullis_out --strandedness " + portcullis_strand,
+        csi_index_status = "--use_csi" if csi_index else ""
     threads: 8
     shell:
-        "(set +u" \
-        + " && cd {params.cwd} " \
-        + " && {params.source} " \
-        + " && /usr/bin/time -v portcullis full --threads {threads} {params.extra} {input.genome} {input.bam}) 2> {log}"
+        "(set +u"
+        + " && cd {params.cwd} "
+        + " && {params.source} "
+        + " && /usr/bin/time -v portcullis full --threads {threads} {params.csi_index_status} {params.extra} {input.genome} {input.bam}) 2> {log}"
 
 #######################
 # END
