@@ -57,7 +57,7 @@ load_parameters:
   stringtie: ""
   # for scallop ignore options: --library_type, -l
   scallop: "--verbose 0"
-  # for portcullis ignore options: --output, --strandedness
+  # for portcullis ignore options: --output, --strandedness, --use_csi
   portcullis: "--orientation FR --canonical C,S --min_cov 2 --save_bad"
 
 #####
