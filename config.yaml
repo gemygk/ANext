@@ -16,7 +16,6 @@ samples:
     Sample17: [data/reads/Sample17.R1.fastq.gz,data/reads/Sample17.R2.fastq.gz]
     Sample18: [data/reads/Sample18.R1.fastq,data/reads/Sample18.R2.fastq]
 
-
 # provide stranded option if the RNA-Seq samples are stranded
 # User *MUST* include one of the below three options:
 # - fr-firststrand, fr-secondstrand, unstranded
@@ -25,6 +24,15 @@ samples:
 # non-dUTP              ==> fr-secondstrand (NuGen, ScripSeq, directional TruSeq)
 # unstranded            ==> unstranded
 strandedness: fr-firststrand
+
+
+# provide PacBio reads
+# - if providing gzipped file, please use the extension '.gz'
+# - you are free to provide a mix of uncompressed fastq files or gzipped files
+# - the sample keys will be used for naming the output files [for e.g., JAG_V, JAG_R]
+pacbio_reads:
+    JAG_V: data/pacbio/JAG_V.PacBio.fasta.gz
+    JAG_R: data/pacbio/JAG_R.PacBio.fasta.gz
 
 # output folder name, NOT path
 output: ./output

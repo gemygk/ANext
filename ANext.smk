@@ -109,6 +109,35 @@ if strandedness not in ("fr-firststrand","fr-secondstrand", "unstranded"):
     print ("ERROR: The strand option provided '{0}' is not in vaild format. The valid formats are fr-firststrand, fr-secondstrand, OR unstranded".format(strandedness))
     sys.exit()
 
+# get pacbio reads
+# work out if samples are gzipped or not
+pacbio_samples = []
+pacbio_read_dir = os.path.join(OUTPUT,"data","pacbio_reads")
+all_pacbio_samples = config["pacbio_reads"]
+gzipped = None
+for sample_name, reads in all_pacbio_samples.items():
+    pacbio_samples.append(sample_name)
+    r_path = os.path.abspath(reads)
+    gzipped = True if r_path.lower().endswith(".gz") else False
+    if not os.path.exists(r_path):
+        print ("ERROR: The PacBio sample '{0}' read location '{1}'cannot be accessed".format(sample_name,r_path))
+        sys.exit()
+    if not os.path.exists(pacbio_read_dir):
+        os.makedirs(pacbio_read_dir)
+    new_read_name_list = (sample_name,"fastq.gz") if gzipped else (sample_name,"fastq")
+    new_read_name = ".".join(new_read_name_list)
+    cmd = "cd " + pacbio_read_dir + " && ln -s " + r_path + " " + new_read_name
+    if not os.path.exists(os.path.join(pacbio_read_dir,new_read_name)):
+        os.system(cmd)
+    # if the reads are gzipped then once linked unzip it - TO DO FROM BELOW
+    if gzipped:
+        cmd = "snakemake --snakefile /hpc-home/kaithakg/snakemake_scripts/ahrd.rodents.generic.smk" \
+          + " --configfile " + config \
+          + " --cluster-config " + hpc_config \
+          + " -np"
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE,universal_newlines=True) # for universal_newlines - https://stackoverflow.com/a/4417735
+
+
 hisat2_strand = None # tool help here : https://ccb.jhu.edu/software/hisat2/manual.shtml
 stringtie_strand = None # tool help here : http://ccb.jhu.edu/software/stringtie/index.shtml?t=manual
 scallop_strand = None # tool help here : https://github.com/Kingsford-Group/scallop
