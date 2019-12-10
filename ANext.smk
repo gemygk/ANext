@@ -186,11 +186,11 @@ rule hisat2_build:
 # https://www.biostars.org/p/296020/#296132
 def get_r1(wildcards):
     # code that returns a list of fastq files for read 1 based on *wildcards.sample* e.g.
-    return glob(os.path.join(read_dir,wildcards.sample + '*R1.fastq*'))
+    return glob(os.path.join(read_dir,wildcards.sample + '.R1.fastq*'))
 
 def get_r2(wildcards):
     # code that returns a list of fastq files for read 2 based on *wildcards.sample* e.g.
-    return glob(os.path.join(read_dir,wildcards.sample + '*R2.fastq*'))
+    return glob(os.path.join(read_dir,wildcards.sample + '.R2.fastq*'))
 
 rule hisat2:
     input:
